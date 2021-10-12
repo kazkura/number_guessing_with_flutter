@@ -27,16 +27,21 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final TextEditingController _textEditingController = new TextEditingController();
+  final _focusNode = new FocusNode();
+
   String _numStr = '';
   String _message = '';
   String _history = '';
-  int randNum = 0;
+  int _randNum = 0;
+  int _count = 0;
+  bool _endFlag = false;
 
   // 初期化
   @override
   void initState() {
     super.initState();
-    randNum = Random().nextInt(100);
+    _randNum = Random().nextInt(100);
   }
 
   // テキストフィールドが更新されるたびに文字列をセット
@@ -55,25 +60,38 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // 判定してメッセージを表示する。ヒストリーに入力値を追加する
   void _judgeNumber(String numString){
+    _textEditingController.clear();
     setState(() {
-      var num = int.parse(numString);
-      if( num == randNum){
-        _message = 'おめでとう! 正解です!';
-      }else if(num > randNum){
-        _message = '今の予想は大きすぎです!もっと小さな数字です。';
-      }else{
-        _message = '今の予想は小さすぎです!もっと大きな数字です。';
+      if(_endFlag == false){
+        if(_count < 9) {
+          var num = int.parse(numString);
+          if (num == _randNum) {
+            _message = 'おめでとう! 正解です!';
+          } else if (num > _randNum) {
+            _message = '今の予想は大きすぎです!もっと小さな数字です。';
+          } else {
+            _message = '今の予想は小さすぎです!もっと大きな数字です。';
+          }
+          _count += 1;
+        }else{
+          _message = 'ゲームオーバー';
+          _endFlag = true;
+        }
+        _history += numString + ' ';
       }
-      _history += numString + ' ';
+      _focusNode.requestFocus();
     });
   }
 
   // リセットする
   void _resetGame(){
+    _textEditingController.clear();
     setState(() {
-      randNum = Random().nextInt(100);
+      _randNum = Random().nextInt(100);
+      _count = 0;
       _message = '';
       _history = '';
+      _endFlag = false;
     });
   }
 
@@ -107,7 +125,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   width: 100,
                   child: TextField(
                     onChanged: _setNumber,
-                    onSubmitted: _judgeNumber
+                    onSubmitted: _judgeNumber,
+                    controller: _textEditingController,
+                    focusNode: _focusNode,
                   )
                 ),
                 Container(
