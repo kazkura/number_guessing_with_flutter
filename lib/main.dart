@@ -68,9 +68,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void _judgeNumber(String numString){
     _textEditingController.clear();
     setState(() {
+      var num = int.parse(numString);
       if(_endFlag == false){
         if(_count < 9) {
-          var num = int.parse(numString);
           if (num == _randNum) {
             _message = 'おめでとう! 正解です!';
           } else if (num > _randNum) {
@@ -83,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
           _message = 'ゲームオーバー';
           _endFlag = true;
         }
-        _history += numString + ' ';
+        _history += num.toString() + ' ';
       }
       _focusNode.requestFocus();
     });
@@ -115,26 +115,33 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             // 説明文
             Container(
-              width: 400,
+              width: 400.0,
+              padding: const EdgeInsets.all(10.0),
+              color: Colors.lightBlue,
+              alignment: Alignment.center,
               child: Text('1 から 100 までの数字を当ててみて！'
                     '10 回以内に当てられるでしょうか。'
-                    '選んだ数字が大きいか小さいかを表示します。'
+                    '選んだ数字が大きいか小さいかを表示します。',
+                style: TextStyle(
+                  fontSize: 14.0,
+                  color: Colors.white,
+                ),
+
               )
             ),
             // 数値入力フォーム
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Container(
-                  width: 200,
-                  child: Text('予想を入力してください: ')
-                ),
                 Form(
                   key: _testForm,
                   child:
                     Container(
                         width: 200,
                         child: TextFormField(
+                          decoration: const InputDecoration(
+                            hintText: '予想する数字をいれてね',
+                          ),
                           controller: _textEditingController,
                           focusNode: _focusNode,
                           onChanged: _setNumber,
@@ -145,7 +152,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             if(value == null || value.isEmpty){
                               return '何か数字を入力してください';
                             }else{
-                              if( int.parse(value) < 1 || int.parse(value) > 100){
+                              if( int.tryParse(value) == null){
+                                return '自然数を入力してください';
+                              }else if( int.parse(value) < 1 || int.parse(value) > 100){
                                 return '1-100の間で数字を入力してください';
                               }else{
                                 return null;
@@ -170,14 +179,19 @@ class _MyHomePageState extends State<MyHomePage> {
             // 判定結果
             Container(
               width: 400,
+              padding: EdgeInsets.all(10.0),
+              alignment: Alignment.center,
               child: Text('$_message')),
             // 履歴
             Container(
               width: 400,
+              padding: EdgeInsets.all(10.0),
+              alignment: Alignment.center,
               child: Text('$_history')),
             // リセットボタン
             Container(
               width: 400,
+              padding: EdgeInsets.all(10.0),
               child: TextButton(
                   onPressed: _resetGame,
                   child: Text('再度挑戦')
